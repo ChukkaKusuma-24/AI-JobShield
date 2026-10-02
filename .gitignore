@@ -1,0 +1,55 @@
+# Virtual Environments
+venv/
+.venv/
+backend/venv/
+env/
+ENV/
+
+# Environment Variables & Secrets (CRITICAL: never commit actual secrets)
+.env
+backend/.env
+frontend/.env
+*.env
+*.env.local
+!*.env.example
+
+# Node Dependencies & Package Bundles
+node_modules/
+frontend/node_modules/
+package-lock.json
+
+# Build Distributions
+dist/
+frontend/dist/
+build/
+
+# Python Cache & Testing
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local SQLite Databases & Session Cache
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+*.db
+*.sqlite
+
+# User Uploaded Artifacts
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
