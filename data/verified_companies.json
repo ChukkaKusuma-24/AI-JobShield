@@ -1,0 +1,182 @@
+[
+  {
+    "name": "Infosys",
+    "aliases": ["infosys limited", "infosys technologies", "infosys bpo", "infosys bpm"],
+    "official_domains": ["infosys.com"],
+    "careers_urls": ["https://www.infosys.com/careers", "https://career.infosys.com"],
+    "industry": "Information Technology & Consulting",
+    "status": "VERIFIED",
+    "description": "Global leader in next-generation digital services and consulting, headquartered in Bengaluru, India."
+  },
+  {
+    "name": "Tata Consultancy Services",
+    "aliases": ["tcs", "tata consultancy", "tcs ibegin"],
+    "official_domains": ["tcs.com"],
+    "careers_urls": ["https://www.tcs.com/careers", "https://ibegin.tcs.com"],
+    "industry": "Information Technology & Consulting",
+    "status": "VERIFIED",
+    "description": "Multinational information technology services and consulting company, part of the Tata Group."
+  },
+  {
+    "name": "Wipro",
+    "aliases": ["wipro limited", "wipro technologies"],
+    "official_domains": ["wipro.com"],
+    "careers_urls": ["https://careers.wipro.com", "https://www.wipro.com/careers"],
+    "industry": "Information Technology & Consulting",
+    "status": "VERIFIED",
+    "description": "Leading global information technology, consulting and business process services company."
+  },
+  {
+    "name": "HCLTech",
+    "aliases": ["hcl technologies", "hcl tech", "hcl"],
+    "official_domains": ["hcltech.com", "hcl.com"],
+    "careers_urls": ["https://www.hcltech.com/careers"],
+    "industry": "Information Technology & Consulting",
+    "status": "VERIFIED",
+    "description": "Global technology company delivering industry-leading capabilities across digital, engineering, cloud and AI."
+  },
+  {
+    "name": "Tech Mahindra",
+    "aliases": ["techmahindra", "tech m"],
+    "official_domains": ["techmahindra.com"],
+    "careers_urls": ["https://careers.techmahindra.com"],
+    "industry": "Information Technology & Consulting",
+    "status": "VERIFIED",
+    "description": "Leading provider of digital transformation, consulting and business re-engineering services."
+  },
+  {
+    "name": "Cognizant",
+    "aliases": ["cognizant technology solutions", "cts"],
+    "official_domains": ["cognizant.com"],
+    "careers_urls": ["https://careers.cognizant.com"],
+    "industry": "Information Technology & Consulting",
+    "status": "VERIFIED",
+    "description": "American multinational information technology services and consulting company."
+  },
+  {
+    "name": "Accenture",
+    "aliases": ["accenture solutions", "accenture india"],
+    "official_domains": ["accenture.com"],
+    "careers_urls": ["https://www.accenture.com/careers"],
+    "industry": "Professional Services & IT",
+    "status": "VERIFIED",
+    "description": "Global professional services company with leading capabilities in digital, cloud and security."
+  },
+  {
+    "name": "Microsoft",
+    "aliases": ["microsoft corporation", "microsoft india"],
+    "official_domains": ["microsoft.com"],
+    "careers_urls": ["https://careers.microsoft.com"],
+    "industry": "Technology & Software",
+    "status": "VERIFIED",
+    "description": "American multinational technology corporation."
+  },
+  {
+    "name": "Google",
+    "aliases": ["google llc", "google india", "alphabet"],
+    "official_domains": ["google.com"],
+    "careers_urls": ["https://careers.google.com"],
+    "industry": "Technology & Internet",
+    "status": "VERIFIED",
+    "description": "American multinational technology company focusing on search, cloud, AI and hardware."
+  },
+  {
+    "name": "Amazon",
+    "aliases": ["amazon.com", "amazon india", "amazon development centre"],
+    "official_domains": ["amazon.com", "amazon.jobs"],
+    "careers_urls": ["https://www.amazon.jobs"],
+    "industry": "E-Commerce & Cloud Computing",
+    "status": "VERIFIED",
+    "description": "American multinational technology company focusing on e-commerce, cloud computing (AWS), and AI."
+  },
+  {
+    "name": "IBM",
+    "aliases": ["ibm corporation", "ibm india", "international business machines"],
+    "official_domains": ["ibm.com"],
+    "careers_urls": ["https://www.ibm.com/careers"],
+    "industry": "Technology & Cloud Computing",
+    "status": "VERIFIED",
+    "description": "Global technology and cloud platform company headquartered in New York."
+  },
+  {
+    "name": "Deloitte",
+    "aliases": ["deloitte touche tohmatsu", "deloitte india"],
+    "official_domains": ["deloitte.com"],
+    "careers_urls": ["https://www2.deloitte.com/careers"],
+    "industry": "Audit, Consulting & Financial Advisory",
+    "status": "VERIFIED",
+    "description": "International professional services network and one of the Big Four accounting organizations."
+  },
+  {
+    "name": "Capgemini",
+    "aliases": ["capgemini technology", "capgemini india"],
+    "official_domains": ["capgemini.com"],
+    "careers_urls": ["https://www.capgemini.com/careers"],
+    "industry": "IT & Consulting",
+    "status": "VERIFIED",
+    "description": "French multinational information technology services and consulting company."
+  },
+  {
+    "name": "Oracle",
+    "aliases": ["oracle corporation", "oracle india"],
+    "official_domains": ["oracle.com"],
+    "careers_urls": ["https://www.oracle.com/careers"],
+    "industry": "Enterprise Software & Cloud",
+    "status": "VERIFIED",
+    "description": "American multinational computer technology corporation."
+  },
+  {
+    "name": "LTIMindtree",
+    "aliases": ["lti", "mindtree", "l&t infotech"],
+    "official_domains": ["ltimindtree.com"],
+    "careers_urls": ["https://www.ltimindtree.com/careers"],
+    "industry": "IT Services & Consulting",
+    "status": "VERIFIED",
+    "description": "Global technology consulting and digital solutions company, part of the Larsen & Toubro Group."
+  },
+  {
+    "name": "Reliance Jio",
+    "aliases": ["jio", "reliance jio infocomm", "reliance industries"],
+    "official_domains": ["jio.com", "ril.com"],
+    "careers_urls": ["https://careers.jio.com"],
+    "industry": "Telecommunications & Digital Services",
+    "status": "VERIFIED",
+    "description": "Indian telecommunications company and subsidiary of Jio Platforms."
+  },
+  {
+    "name": "Flipkart",
+    "aliases": ["flipkart internet", "flipkart india"],
+    "official_domains": ["flipkart.com", "flipkartcareers.com"],
+    "careers_urls": ["https://www.flipkartcareers.com"],
+    "industry": "E-Commerce",
+    "status": "VERIFIED",
+    "description": "Indian e-commerce company, subsidiary of Walmart."
+  },
+  {
+    "name": "TechNova Solutions",
+    "aliases": ["technova"],
+    "official_domains": ["technovasolutions.com"],
+    "careers_urls": ["https://www.technovasolutions.com/careers"],
+    "industry": "Software Engineering",
+    "status": "PARTIALLY VERIFIED",
+    "description": "Mid-tier enterprise software provider."
+  },
+  {
+    "name": "CloudBridge Systems",
+    "aliases": ["cloudbridge"],
+    "official_domains": ["cloudbridgesystems.com"],
+    "careers_urls": ["https://www.cloudbridgesystems.com/careers"],
+    "industry": "Cloud Infrastructure",
+    "status": "PARTIALLY VERIFIED",
+    "description": "Cloud hosting and DevOps consultancy."
+  },
+  {
+    "name": "DataSphere Labs",
+    "aliases": ["datasphere"],
+    "official_domains": ["dataspherelabs.com"],
+    "careers_urls": ["https://www.dataspherelabs.com/careers"],
+    "industry": "Data Analytics",
+    "status": "PARTIALLY VERIFIED",
+    "description": "Business intelligence and data engineering firm."
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "confusion_matrix": [
+    [
+      50,
+      0
+    ],
+    [
+      0,
+      50
+    ]
+  ],
+  "dataset_size": 400,
+  "dataset_path": "data\\demo_training_data.csv",
+  "timestamp": "2026-09-29T15:29:18.630502+00:00",
+  "is_demo_data": true,
+  "classifier": "logistic",
+  "disclaimer": "Metrics come from a small synthetic demo dataset and do NOT represent real-world performance."
+}
