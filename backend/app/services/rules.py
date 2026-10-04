@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from app.config import get_settings
+from app.services.evidence import classify_positive_signal, classify_rule_signal
 
 # Tunable weights – single place for faculty demos
 RULE_WEIGHTS: dict[str, dict[str, Any]] = {
@@ -29,10 +30,10 @@ RULE_WEIGHTS: dict[str, dict[str, Any]] = {
 POSITIVE_MAX_BONUS = 25
 
 EQUIPMENT_PATTERNS = [
-    r"(?:buy|purchase|pay\s+for)\s+(?:a\s+)?(?:laptop|equipment|software|kit|device|hardware|tools|materials)",
+    r"(?:buy|purchase|pay\s+for)\s+(?:a\s+)?(?:home\s+office\s+)?(?:laptop|equipment|software|kit|device|hardware|tools|materials)",
     r"laptop\s+fee",
     r"equipment\s+(?:fee|deposit|cost|charge)",
-    r"home\s+office\s+(?:kit|setup)\s+fee",
+    r"home\s+office\s+(?:kit|setup)\s+(?:fee|deposit|cost|charge)",
 ]
 FEE_PATTERNS = [
     r"registration\s+fee",
@@ -45,14 +46,12 @@ FEE_PATTERNS = [
     r"joining\s+fee",
 ]
 MONEY_PATTERNS = [
-    r"gift\s*cards?",
+    r"(?:pay|send|transfer|deposit|purchase|buy|invest|redeem\s+for\s+cash)\s+(?:via|with|through|using|in)?\s*(?:a\s+)?(?:gift\s*cards?|western\s+union|crypto|bitcoin|ethereum|upi)",
+    r"(?:gift\s*cards?|western\s+union|crypto|bitcoin|ethereum|upi)\s+(?:payment|transfer|deposit|investment)",
+    r"(?:pay|send|transfer)\s+(?:money|funds|cash|payment|deposit|₹|rs)",
+    r"transfer\s+(?:funds|amount|₹|rs)\s+(?:to|via|into)",
     r"western\s+union",
-    r"bank\s+transfer",
-    r"\bcrypto\b",
-    r"\bbitcoin\b",
-    r"\bethereum\b",
     r"upi\s+(?:payment|transfer|id)",
-    r"send\s+(?:money|payment|₹|rs)",
 ]
 SENSITIVE_PATTERNS = [
     r"\baadhaar\b",
@@ -134,12 +133,24 @@ def _find_first(patterns: list[str], text: str) -> str | None:
 
 def _flag(rule_id: str, evidence: str, points_override: int | None = None) -> dict:
     meta = RULE_WEIGHTS[rule_id]
+    ev_class = classify_rule_signal(rule_id, meta["severity"]).value
     return {
         "id": rule_id,
         "label": meta["label"],
         "severity": meta["severity"],
+        "evidence_class": ev_class,
         "points": points_override if points_override is not None else meta["points"],
         "evidence": evidence[:200],
+    }
+
+
+def _positive(signal_id: str, label: str) -> dict:
+    ev_class, strength = classify_positive_signal(signal_id)
+    return {
+        "id": signal_id,
+        "label": label,
+        "evidence_class": ev_class.value,
+        "strength": strength,
     }
 
 
@@ -224,17 +235,49 @@ def analyze_rules(
     if ev:
         flags.append(_flag("suspicious_contact", ev))
 
+    from app.services.company_verifier import resolve_company_identity
+    identity = resolve_company_identity(company_name)
+
+    has_impersonation = (
+        company_status == "IMPERSONATION_RISK"
+        or any(f["id"] == "company_impersonation" for f in flags)
+    )
     if email and "@" in email:
         domain = email.split("@")[-1].lower().strip()
-        if domain in free_domains:
-            flags.append(_flag("free_email", email))
-        company_toks = _company_tokens(company_name)
-        domain_toks = set(re.findall(r"[a-z0-9]+", domain.replace(".", " ")))
-        if company_toks and not (company_toks & domain_toks) and domain not in free_domains:
-            # domain doesn't share tokens with company
-            flags.append(_flag("email_domain_mismatch", f"{email} vs {company_name}"))
-        elif company_toks and domain in free_domains:
-            flags.append(_flag("email_domain_mismatch", f"{email} vs {company_name}"))
+        is_free = domain in free_domains
+        is_official = (
+            identity.is_known_entity
+            and bool(identity.official_domains)
+            and any(domain == od or domain.endswith("." + od) for od in identity.official_domains)
+        )
+
+        if not has_impersonation:
+            if is_official:
+                pass  # Official verified enterprise email domain
+            elif is_free:
+                if identity.is_known_entity:
+                    flags.append(
+                        _flag(
+                            "company_impersonation",
+                            f"Recruiter using personal email ({email}) for verified enterprise {identity.canonical_name}",
+                        )
+                    )
+                else:
+                    flags.append(_flag("free_email", email))
+            else:
+                # Custom domain
+                if identity.is_known_entity:
+                    flags.append(_flag("email_domain_mismatch", f"{email} vs {identity.canonical_name}"))
+                else:
+                    company_toks = identity.tokens or _company_tokens(company_name)
+                    domain_toks = set(re.findall(r"[a-z0-9]+", domain.replace(".", " ")))
+                    domain_root = domain.split(".")[0]
+                    has_match = (
+                        bool(company_toks & domain_toks)
+                        or any(t in domain_root for t in company_toks if len(t) >= 3)
+                    )
+                    if company_toks and not has_match:
+                        flags.append(_flag("email_domain_mismatch", f"{email} vs {company_name}"))
 
     ev = _find_first(URGENCY_PATTERNS, text)
     if ev:
@@ -265,9 +308,8 @@ def analyze_rules(
             )
         )
 
-    if url_risk_level in ("MEDIUM", "HIGH"):
-        pts = 18 if url_risk_level == "HIGH" else RULE_WEIGHTS["suspicious_url"]["points"]
-        flags.append(_flag("suspicious_url", f"URL risk level: {url_risk_level}", pts))
+    if url_risk_level == "HIGH":
+        flags.append(_flag("suspicious_url", f"URL risk level: {url_risk_level}", 18))
 
     # Deduplicate by id (keep highest points)
     by_id: dict[str, dict] = {}
@@ -280,33 +322,48 @@ def analyze_rules(
     has_critical = any(f.get("severity") == "critical" for f in flags)
 
     if _find_first(RESPONSIBILITY_CUES, description):
-        positives.append({"id": "detailed_responsibilities", "label": "Detailed responsibilities listed"})
+        positives.append(_positive("detailed_responsibilities", "Detailed responsibilities listed"))
         bonus += 5
     if _find_first(QUAL_CUES, description):
-        positives.append({"id": "qualifications", "label": "Qualifications / skills listed"})
+        positives.append(_positive("qualifications", "Qualifications / skills listed"))
         bonus += 5
-    if email and "@" in email:
-        domain = email.split("@")[-1].lower()
-        if domain not in free_domains and (_company_tokens(company_name) & set(
-            re.findall(r"[a-z0-9]+", domain.replace(".", " "))
-        )):
-            positives.append({"id": "official_email", "label": "Official-looking company-domain email"})
+    if email and "@" in email and not has_impersonation:
+        domain = email.split("@")[-1].lower().strip()
+        is_free = domain in free_domains
+        is_official = (
+            identity.is_known_entity
+            and bool(identity.official_domains)
+            and any(domain == od or domain.endswith("." + od) for od in identity.official_domains)
+        )
+        if is_official:
+            positives.append(_positive("official_email", f"Official company email verified (@{domain})"))
             bonus += 6
+        elif not is_free:
+            company_toks = identity.tokens or _company_tokens(company_name)
+            domain_toks = set(re.findall(r"[a-z0-9]+", domain.replace(".", " ")))
+            domain_root = domain.split(".")[0]
+            has_match = (
+                bool(company_toks & domain_toks)
+                or any(t in domain_root for t in company_toks if len(t) >= 3)
+            )
+            if has_match:
+                positives.append(_positive("official_email", f"Company-matching domain email (@{domain})"))
+                bonus += 4
     if url and url.lower().startswith("https://"):
-        positives.append({"id": "https_url", "label": "HTTPS URL provided"})
+        positives.append(_positive("https_url", "HTTPS URL provided"))
         bonus += 3
     if _find_first(INTERVIEW_CUES, description):
-        positives.append({"id": "interview_process", "label": "Interview / selection process mentioned"})
+        positives.append(_positive("interview_process", "Interview / selection process mentioned"))
         bonus += 5
     if salary and re.search(r"\d", salary) and not any(f["id"] == "unrealistic_salary" for f in flags):
-        positives.append({"id": "realistic_salary", "label": "Salary information looks plausible"})
+        positives.append(_positive("realistic_salary", "Salary information looks plausible"))
         bonus += 3
     if company_status in ("VERIFIED", "PARTIALLY VERIFIED"):
-        positives.append({"id": "company_verified", "label": f"Company status: {company_status}"})
+        positives.append(_positive("company_verified", f"Company status: {company_status}"))
         bonus += 5 if company_status == "VERIFIED" else 2
     if not any(f["id"] in ("fee_request", "money_transfer", "equipment_purchase") for f in flags):
-        positives.append({"id": "no_fee", "label": "No upfront fee request detected"})
-        bonus += 4
+        positives.append(_positive("no_fee", "No upfront fee request detected"))
+        # Neutral absence of negative evidence; grants no positive trust bonus
 
     # Critical scam indicators must never be cancelled out by positive signals
     if has_critical:

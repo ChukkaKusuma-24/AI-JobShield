@@ -60,6 +60,7 @@ def run_analysis(
         url_result=url_result,
         positive_indicators=positives,
         source=source,
+        email=email,
     )
 
     explanation = explain.build_explanation(

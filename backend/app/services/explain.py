@@ -22,13 +22,27 @@ def build_explanation(
 ) -> str:
     """Build a transparent, human-readable structured explanation detailing:
     - Company Verification status & reasons
-    - Risk Factors (Red flags)
-    - Positive Factors
+    - Critical Scam Evidence (if any)
+    - Risk Factors (Negative Evidence)
+    - Missing / Unverified Information
+    - Positive Evidence of Legitimacy
     - Overall Trust & Risk Level
     """
     company_data = company_result or {}
     company_status = company_data.get("status", "UNVERIFIED")
     company_reasons = company_data.get("reasons", [])
+
+    ev_breakdown = (score_breakdown or {}).get("evidence_breakdown", {})
+    crit_ev = ev_breakdown.get("critical_evidence", [])
+    neg_ev = ev_breakdown.get("negative_evidence", [])
+    miss_ev = ev_breakdown.get("missing_evidence", [])
+    pos_ev = ev_breakdown.get("positive_evidence", [])
+
+    # If evidence_breakdown was not provided (e.g. legacy/mock calls), categorize directly
+    if not ev_breakdown:
+        crit_ev = [f for f in red_flags if f.get("severity") == "critical" or f.get("evidence_class") == "CRITICAL_EVIDENCE"]
+        neg_ev = [f for f in red_flags if f not in crit_ev]
+        pos_ev = [p for p in positive_indicators if p.get("id") != "no_fee"]
 
     lines: list[str] = []
 
@@ -46,27 +60,48 @@ def build_explanation(
         else:
             lines.append(f"Reasons:\n• Status assessed as {company_status} based on available signals.")
 
-    # Section 2: Risk Factors
-    if red_flags:
-        lines.append("\nRisk Factors:")
-        for f in red_flags:
+    # Section 2: Critical Scam Evidence
+    if crit_ev:
+        lines.append("\nCritical Scam Evidence:")
+        for f in crit_ev:
+            ev = f.get("evidence", "")
+            if ev and ev != f.get("label"):
+                lines.append(f"• [CRITICAL] {f.get('label')} (Evidence: \"{ev}\")")
+            else:
+                lines.append(f"• [CRITICAL] {f.get('label')}")
+
+    # Section 3: Risk Factors (Negative Evidence)
+    if neg_ev:
+        lines.append("\nRisk Factors (Negative Evidence):")
+        for f in neg_ev:
             ev = f.get("evidence", "")
             if ev and ev != f.get("label"):
                 lines.append(f"• {f.get('label')} (Evidence: \"{ev}\")")
             else:
                 lines.append(f"• {f.get('label')}")
-    else:
-        lines.append("\nRisk Factors:\n• None detected")
+    elif not crit_ev:
+        lines.append("\nRisk Factors (Negative Evidence):\n• None detected")
 
-    # Section 3: Positive Factors
-    if positive_indicators:
-        lines.append("\nPositive Factors:")
-        for p in positive_indicators:
-            lines.append(f"• {p.get('label')}")
-    else:
-        lines.append("\nPositive Factors:\n• None recorded")
+    # Section 4: Missing / Unverified Information
+    if miss_ev:
+        lines.append("\nMissing / Unverified Information:")
+        for m in miss_ev:
+            desc = m.get("description")
+            if desc:
+                lines.append(f"• {m.get('label')}: {desc}")
+            else:
+                lines.append(f"• {m.get('label')}")
 
-    # Section 4: Final Score Assessment
+    # Section 5: Positive Evidence of Legitimacy
+    if pos_ev:
+        lines.append("\nPositive Evidence of Legitimacy:")
+        for p in pos_ev:
+            strength_str = f" [{p.get('strength', 'moderate').capitalize()}]" if p.get("strength") else ""
+            lines.append(f"• {p.get('label')}{strength_str}")
+    else:
+        lines.append("\nPositive Evidence of Legitimacy:\n• None confirmed")
+
+    # Section 6: Final Score Assessment
     if risk_level == "HIGH":
         verdict_str = "High Risk / Likely Scam"
     elif risk_level == "MEDIUM":

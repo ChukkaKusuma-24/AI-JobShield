@@ -147,17 +147,51 @@ def analyze_url(url: str, company_name: str | None = None) -> dict[str, Any]:
         score += 25
 
     if company_name:
-        toks = _normalize_company(company_name)
-        host_toks = set(re.findall(r"[a-z0-9]+", host.replace(".", " ")))
-        if toks and not (toks & host_toks):
-            indicators.append(
-                {
+        from app.services.company_verifier import resolve_company_identity
+        identity = resolve_company_identity(company_name)
+        clean_host = host.lower().lstrip("www.")
+
+        is_official = False
+        if identity.is_known_entity and identity.official_domains:
+            is_official = any(clean_host == od or clean_host.endswith("." + od) for od in identity.official_domains)
+
+        if is_official:
+            indicators.append({
+                "id": "official_domain",
+                "label": f"Matches verified official corporate domain ({clean_host})",
+                "severity": "low",
+            })
+        elif identity.is_known_entity:
+            # Company is a recognized enterprise, but URL is NOT on their registered official domain
+            host_toks = set(re.findall(r"[a-z0-9]+", host.replace(".", " ")))
+            if identity.tokens & host_toks:
+                indicators.append({
+                    "id": "lookalike_domain",
+                    "label": f"Lookalike domain attempting to imitate {identity.canonical_name}",
+                    "severity": "high",
+                })
+                indicators.append({
+                    "id": "company_mismatch",
+                    "label": f"Domain '{clean_host}' is not a registered official domain for {identity.canonical_name}",
+                    "severity": "high",
+                })
+                score += 30
+            else:
+                indicators.append({
+                    "id": "company_mismatch",
+                    "label": f"Domain does not match verified official domain for {identity.canonical_name}",
+                    "severity": "medium",
+                })
+                score += 15
+        else:
+            host_toks = set(re.findall(r"[a-z0-9]+", host.replace(".", " ")))
+            if identity.tokens and not (identity.tokens & host_toks):
+                indicators.append({
                     "id": "company_mismatch",
                     "label": "Domain does not resemble company name",
                     "severity": "medium",
-                }
-            )
-            score += 15
+                })
+                score += 15
 
     score = min(score, 100)
     if score >= 50:
