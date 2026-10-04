@@ -50,7 +50,7 @@ def _domain_from_url(website: str | None) -> str | None:
     try:
         host = urlparse(w).hostname
         if host:
-            return host.lower().lstrip("www.")
+            return host.lower().removeprefix("www.")
         return None
     except Exception:
         return None
@@ -62,7 +62,7 @@ def _clean_domain(domain_or_email: str | None) -> str | None:
     val = domain_or_email.strip().lower()
     if "@" in val:
         val = val.split("@")[-1]
-    val = val.lstrip("www.")
+    val = val.removeprefix("www.")
     return val
 
 

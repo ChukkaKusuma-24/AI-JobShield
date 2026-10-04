@@ -9,7 +9,7 @@
 ![Vite](https://img.shields.io/badge/Vite-5.0%2B-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![Tests](https://img.shields.io/badge/Test%20Suite-50%20Cases%20Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)
+![Tests](https://img.shields.io/badge/Test%20Suite-110%20Cases%20Passing-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 <p align="center">
@@ -584,7 +584,8 @@ AI-JobShield/
 ├── .env.example                            # Safe environment variable template (no secrets)
 ├── .gitignore                              # Git exclusion rules
 ├── LICENSE                                 # MIT License
-└── README.md                               # Master project documentation
+├── README.md                               # Master project documentation
+└── requirements.txt                        # Root Python dependencies manifest
 ```
 
 ---
@@ -648,8 +649,8 @@ backend\venv\Scripts\activate
 # Linux/macOS:
 # source backend/venv/bin/activate
 
-# Install backend dependencies
-pip install -r backend/requirements.txt
+# Install backend dependencies (from repository root or backend directory)
+pip install -r requirements.txt
 
 # Seed database (creates 50 demo users, 12 companies, 14 analytical scans)
 python backend/seed.py

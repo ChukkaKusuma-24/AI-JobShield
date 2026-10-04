@@ -3,20 +3,28 @@
   "precision": 1.0,
   "recall": 1.0,
   "f1": 1.0,
+  "roc_auc": 1.0,
+  "pr_auc": 1.0,
+  "brier_score": 0.0,
   "confusion_matrix": [
     [
-      50,
+      313,
       0
     ],
     [
       0,
-      50
+      288
     ]
   ],
-  "dataset_size": 400,
-  "dataset_path": "C:\\Users\\Dell\\Downloads\\AI-JobShield\\data\\demo_training_data.csv",
-  "timestamp": "2026-09-29T16:57:36.550884+00:00",
-  "is_demo_data": true,
+  "dataset_size": 3426,
+  "train_size": 2357,
+  "val_size": 468,
+  "test_size": 601,
+  "vocabulary_size": 3253,
+  "dataset_path": "C:\\Users\\DELL\\Desktop\\AI-JobShield\\data\\training_data_v2.csv",
+  "timestamp": "2026-10-03T16:29:21.479394+00:00",
+  "is_calibrated": true,
+  "calibration_method": "sigmoid_platt",
   "classifier": "logistic",
-  "disclaimer": "Metrics come from a small synthetic demo dataset and do NOT represent real-world performance."
+  "random_seed": 42
 }

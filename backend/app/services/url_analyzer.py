@@ -149,7 +149,7 @@ def analyze_url(url: str, company_name: str | None = None) -> dict[str, Any]:
     if company_name:
         from app.services.company_verifier import resolve_company_identity
         identity = resolve_company_identity(company_name)
-        clean_host = host.lower().lstrip("www.")
+        clean_host = host.lower().removeprefix("www.")
 
         is_official = False
         if identity.is_known_entity and identity.official_domains:

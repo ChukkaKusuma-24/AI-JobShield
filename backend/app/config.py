@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = ""
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 1440
-    DATABASE_URL: str = "mysql+pymysql://root:kusuma%23%26247@localhost:3306/ai_jobshield"
+    DATABASE_URL: str = "sqlite:///./database/jobshield.db"
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     RULE_WEIGHT: float = 0.6
@@ -83,6 +83,8 @@ class Settings(BaseSettings):
     TESSERACT_CMD: str = ""
 
     ML_MODEL_PATH: str = str(ROOT_DIR / "models" / "jobshield_model.joblib")
+    EXPECTED_MODEL_SHA256: str = "636e26e42b5a4179a42f9e9161dd7692d4f63146f1475659021605b9676bf1a2"
+    VERIFY_MODEL_INTEGRITY: bool = True
     ML_ALTERNATIVE: str = "logistic"
     DEMO_DATA_PATH: str = str(ROOT_DIR / "data" / "demo_training_data.csv")
 

@@ -19,7 +19,7 @@ if TEST_DB.exists():
 import os
 
 os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB}"
-os.environ["SECRET_KEY"] = "test-secret-key-jobshield"
+os.environ["SECRET_KEY"] = "test-secret-key-jobshield-api-testing-32bytes-min"
 os.environ["ENABLE_ONLINE_LOOKUP"] = "false"
 os.environ["SMTP_CONSOLE_FALLBACK"] = "true"
 os.environ["SMTP_HOST"] = ""

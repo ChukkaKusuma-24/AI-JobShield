@@ -1,6 +1,7 @@
 """ML model load / predict service."""
 from __future__ import annotations
 
+import hashlib
 import logging
 import sys
 from pathlib import Path
@@ -13,7 +14,32 @@ from app.config import get_settings, ROOT_DIR
 
 logger = logging.getLogger(__name__)
 
-_state: dict[str, Any] = {"pipeline": None, "available": False}
+_state: dict[str, Any] = {
+    "pipeline": None,
+    "available": False,
+    "sha256_verified": False,
+    "sha256": None,
+}
+
+
+def compute_model_sha256(path: Path | str) -> str:
+    """Compute the SHA-256 hex digest of the model artifact file."""
+    p = Path(path)
+    if not p.is_file():
+        return ""
+    h = hashlib.sha256()
+    with p.open("rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest().lower()
+
+
+def get_model_sha256() -> str | None:
+    return _state.get("sha256")
+
+
+def is_sha256_verified() -> bool:
+    return bool(_state.get("sha256_verified", False))
 
 
 def _ensure_preprocess_path():
@@ -57,7 +83,7 @@ def _auto_train() -> bool:
         return False
 
 
-def load_model() -> bool:
+def load_model(verify_checksum: bool | None = None) -> bool:
     settings = get_settings()
     path = Path(settings.ML_MODEL_PATH)
     if not path.exists():
@@ -66,6 +92,31 @@ def load_model() -> bool:
             _state["pipeline"] = None
             _state["available"] = False
             return False
+
+    should_verify = (
+        verify_checksum
+        if verify_checksum is not None
+        else getattr(settings, "VERIFY_MODEL_INTEGRITY", True)
+    )
+    expected_sha256 = getattr(settings, "EXPECTED_MODEL_SHA256", "").strip().lower()
+
+    if should_verify and expected_sha256:
+        actual_sha256 = compute_model_sha256(path)
+        if actual_sha256 != expected_sha256:
+            logger.error(
+                "Model integrity check failed for %s! Expected SHA-256 %s, but found %s",
+                path,
+                expected_sha256,
+                actual_sha256,
+            )
+            _state["pipeline"] = None
+            _state["available"] = False
+            _state["sha256_verified"] = False
+            _state["sha256"] = actual_sha256
+            return False
+        _state["sha256_verified"] = True
+        _state["sha256"] = actual_sha256
+        logger.info("Model integrity verified (SHA-256: %s)", actual_sha256[:16] + "...")
 
     try:
         bundle = joblib.load(path)

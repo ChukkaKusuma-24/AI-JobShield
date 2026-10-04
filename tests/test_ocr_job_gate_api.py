@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 import requests
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "http://127.0.0.1:8000/api"
@@ -23,6 +24,13 @@ def test_ocr_job_gate_api():
 
     if login.status_code != 200:
         pytest.skip("Login to local server failed, skipping live API OCR test")
+
+    try:
+        health = requests.get(f"{BASE}/health", timeout=5).json()
+        if not health.get("ocr_available"):
+            pytest.skip("OCR is not available on local server (Tesseract not installed)")
+    except Exception:
+        pass
 
     token = login.json()["token"]
     headers = {"Authorization": f"Bearer {token}"}

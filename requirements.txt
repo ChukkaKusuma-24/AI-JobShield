@@ -1,0 +1,2 @@
+# Root requirements manifest redirecting to backend dependencies
+-r backend/requirements.txt
